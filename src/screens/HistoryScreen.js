@@ -36,10 +36,19 @@ export default function HistoryScreen() {
         [year, month],
         (tx, results) => {
           var temp = [];
-          for (let i = 0; i < results.rows.length; ++i)
+          var tempBalance = [];
+          var tempResult = 0;
+          for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
+            tempResult =
+              results.rows.item(i).type === 'Income'
+                ? tempResult + results.rows.item(i).item_price
+                : tempResult - results.rows.item(i).item_price;
+            tempBalance.push(tempResult);
+          }
           console.log('history', temp);
           setData(temp);
+          setBalance(tempBalance);
         },
       );
     });
@@ -56,13 +65,7 @@ export default function HistoryScreen() {
     });
   };
 
-  const dataItem = (item) => {
-    setBalance(
-      item.type === 'Income'
-        ? balance + item.item_price
-        : balance - item.item_price,
-    );
-
+  const dataItem = (item, index) => {
     return (
       <View style={styles.tableTitleContainer}>
         <View style={styles.firstColumn}>
@@ -78,7 +81,7 @@ export default function HistoryScreen() {
           </Text>
         </View>
         <View style={styles.lastColumn}>
-          <Text>{item.balance ? item.balance : balance}</Text>
+          <Text>{item.balance ? item.balance : balance[index]}</Text>
         </View>
       </View>
     );
@@ -106,13 +109,13 @@ export default function HistoryScreen() {
           }}>
           <Picker
             selectedValue={month}
-            style={{height: 50, width: 100}}
+            style={{height: 50, width: 200}}
             onValueChange={(itemValue) => setMonth(itemValue)}>
             {pickerItem(MONTH)}
           </Picker>
           <Picker
             selectedValue={year}
-            style={{height: 50, width: 100}}
+            style={{height: 50, width: 200}}
             onValueChange={(itemValue) => setYear(itemValue)}>
             {pickerItem(YEAR)}
           </Picker>
@@ -138,7 +141,7 @@ export default function HistoryScreen() {
             <FlatList
               data={data}
               keyExtractor={(_, index) => index.toString()}
-              renderItem={({item}) => dataItem(item)}
+              renderItem={({item, index}) => dataItem(item, index)}
               ListEmptyComponent={() => (
                 <View
                   style={{
@@ -150,6 +153,12 @@ export default function HistoryScreen() {
                   <Text>no data</Text>
                 </View>
               )}
+              ListFooterComponent={dataItem({
+                day: '',
+                item_name: 'Total',
+                item_price: balance[balance.length - 1],
+                balance: balance[balance.length - 1],
+              })}
             />
           </View>
         </View>
@@ -159,26 +168,12 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  itemContainer: {
-    margin: 10,
-    padding: 20,
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: 'black',
-    backgroundColor: 'white',
-    elevation: 10,
-    borderRadius: 10,
-  },
   container: {
     flex: 1,
-  },
-  firstColumn: {
-    borderWidth: 1,
-    borderLeftColor: 'black',
+    backgroundColor: 'white',
   },
   submitBtn: {
     backgroundColor: 'dodgerblue',
-
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
@@ -187,7 +182,7 @@ const styles = StyleSheet.create({
   tableTitleContainer: {
     flexDirection: 'row',
     width: width,
-    paddingTop: 5,
+    paddingTop: 15,
     paddingBottom: 5,
     borderBottomWidth: 1,
     borderBottomColor: 'black',

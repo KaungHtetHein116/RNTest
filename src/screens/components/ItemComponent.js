@@ -36,13 +36,19 @@ export default function ItemComponent({item, getItem}) {
     <View>
       <View style={styles.itemContainer}>
         <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
-          <Text>Item Name : {item.item_name}</Text>
+          <Text>Date : {item.date}</Text>
           <TouchableOpacity onPress={() => handlePressDelete(item.item_id)}>
             <AntDesign name="delete" size={30} />
           </TouchableOpacity>
         </View>
-        <Text>Item Price : {item.item_price}</Text>
-        <Text>Date : {item.date}</Text>
+
+        <Text>Title : {item.item_name}</Text>
+        <View style={{flexDirection: 'row'}}>
+          <Text>Item Price : </Text>
+          <Text style={{color: item.type === 'Income' ? 'blue' : 'red'}}>
+            {item.item_price} Kyats
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -53,7 +59,7 @@ const styles = StyleSheet.create({
     margin: 10,
     padding: 20,
     justifyContent: 'space-between',
-    borderWidth: 1,
+    borderWidth: 0.6,
     borderColor: 'black',
     backgroundColor: 'white',
     elevation: 10,
