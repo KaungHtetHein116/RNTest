@@ -12,7 +12,6 @@ import {openDatabase} from 'react-native-sqlite-storage';
 import RadioButtonRN from 'radio-buttons-react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {ScrollView} from 'react-native-gesture-handler';
-import {useNavigation} from '@react-navigation/native';
 
 var db = openDatabase({name: 'UserDatabase.db'});
 const data = [
@@ -24,7 +23,6 @@ const data = [
   },
 ];
 export default function CreateItemModal({onClose}) {
-  const navigation = useNavigation();
   const [itemName, setItemName] = useState('');
   const [itemPrice, setItemPrice] = useState('');
   const [date, setDate] = useState('');
@@ -61,7 +59,7 @@ export default function CreateItemModal({onClose}) {
 
     db.transaction(function (tx) {
       tx.executeSql(
-        'INSERT INTO table_user (item_name, type, item_price, date, month, year) VALUES (?,?,?)',
+        'INSERT INTO item_table (item_name, type, item_price, date, month, year) VALUES (?,?,?,?,?,?)',
         [
           itemName,
           itemType.label,
@@ -76,11 +74,11 @@ export default function CreateItemModal({onClose}) {
           if (results.rowsAffected > 0) {
             Alert.alert(
               'Success',
-              'You are Registered Successfully',
+              'Item saved successfully',
               [
                 {
                   text: 'Ok',
-                  onPress: () => navigation.navigate('HomeScreen'),
+                  onPress: () => onClose(),
                 },
               ],
               {cancelable: false},

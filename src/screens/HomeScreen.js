@@ -34,7 +34,7 @@ export default function HomeScreen() {
         console.log('temp', temp);
       });
     });
-  }, []);
+  }, [modalVisible]);
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -47,9 +47,14 @@ export default function HomeScreen() {
         <CreateItemModal onClose={() => setModalVisible(false)} />
       </Modal>
       <Text>HomeScreen</Text>
-      <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Text>Add Item</Text>
-      </TouchableOpacity>
+      <View style={{justifyContent: 'center', alignItems: 'center', width: 70}}>
+        <TouchableOpacity
+          style={styles.submitBtn}
+          activeOpacity={0.8}
+          onPress={() => setModalVisible(true)}>
+          <Text style={{color: 'white'}}>Add</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -58,5 +63,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  submitBtn: {
+    width: '50%',
+    backgroundColor: 'dodgerblue',
+    borderRadius: 25,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
