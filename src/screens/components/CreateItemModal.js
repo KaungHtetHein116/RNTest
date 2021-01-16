@@ -7,12 +7,90 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
+import {Calendar} from 'react-native-calendars';
+import {openDatabase} from 'react-native-sqlite-storage';
+import RadioButtonRN from 'radio-buttons-react-native';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import {ScrollView} from 'react-native-gesture-handler';
+import {useNavigation} from '@react-navigation/native';
 
+var db = openDatabase({name: 'UserDatabase.db'});
+const data = [
+  {
+    label: 'Income',
+  },
+  {
+    label: 'Expense',
+  },
+];
 export default function CreateItemModal({onClose}) {
-  const [product, setProduct] = useState('');
-  const [price, setPrice] = useState('');
+  const navigation = useNavigation();
+  const [itemName, setItemName] = useState('');
+  const [itemPrice, setItemPrice] = useState('');
   const [date, setDate] = useState('');
+  const [itemType, setItemType] = useState('');
+
+  const onSubmit = () => {
+    console.log(
+      itemName,
+      itemType.label,
+      itemPrice,
+      date.dateString,
+      date.month,
+      date.year,
+    );
+
+    if (!itemName) {
+      alert('Please fill name');
+      return;
+    }
+
+    if (!itemType) {
+      alert('Please select type');
+      return;
+    }
+
+    if (!itemPrice) {
+      alert('Please fill price');
+      return;
+    }
+    if (!date) {
+      alert('Please fill date');
+      return;
+    }
+
+    db.transaction(function (tx) {
+      tx.executeSql(
+        'INSERT INTO table_user (item_name, type, item_price, date, month, year) VALUES (?,?,?)',
+        [
+          itemName,
+          itemType.label,
+          itemPrice,
+          date.dateString,
+          date.month,
+          date.year,
+        ],
+
+        (tx, results) => {
+          console.log('Results', results.rowsAffected);
+          if (results.rowsAffected > 0) {
+            Alert.alert(
+              'Success',
+              'You are Registered Successfully',
+              [
+                {
+                  text: 'Ok',
+                  onPress: () => navigation.navigate('HomeScreen'),
+                },
+              ],
+              {cancelable: false},
+            );
+          } else alert('Failed');
+        },
+      );
+    });
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -25,42 +103,63 @@ export default function CreateItemModal({onClose}) {
         </View>
         <View style={{height: 30, width: 30}} />
       </View>
-
-      <Text style={styles.text}>Item Name</Text>
-      <TextInput style={styles.textInput} placeholder="Shampoo" />
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-        }}>
-        <View style={{width: '40%'}}>
-          <Text style={styles.text}>Price</Text>
-          <TextInput
-            style={styles.textInput}
-            placeholder="12345"
-            keyboardType="number-pad"
-          />
+      <ScrollView>
+        <Text style={styles.text}>Item Name</Text>
+        <TextInput
+          style={styles.textInput}
+          placeholder="Enter Here"
+          onChangeText={(text) => setItemName(text)}
+        />
+        <Text style={styles.text}>Select Type</Text>
+        <RadioButtonRN
+          data={data}
+          selectedBtn={(e) => {
+            setItemType(e);
+          }}
+          icon={<FontAwesome name="check-circle" size={25} color="#2c9dd1" />}
+        />
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+          }}>
+          <View style={{width: '40%'}}>
+            <Text style={styles.text}>Price</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Enter Here"
+              keyboardType="number-pad"
+              onChangeText={(text) => setItemPrice(text)}
+            />
+          </View>
         </View>
-      </View>
-      <Text style={styles.text}>Pick Date</Text>
-      <Calendar
-        current={'2021-01-16'}
-        minDate={'2021-01-01'}
-        maxDate={'2022-01-1'}
-        onDayPress={(day) => {
-          console.log('selected day', day);
-        }}
-        monthFormat={'yyyy MM'}
-        onMonthChange={(month) => {
-          console.log('month changed', month);
-        }}
-        hideArrows={false}
-        hideExtraDays={true}
-        disableMonthChange={true}
-        firstDay={1}
-      />
+        <Text style={styles.text}>Pick Date</Text>
+        <Calendar
+          current={'2021-01-16'}
+          minDate={'2021-01-01'}
+          maxDate={'2027-01-01'}
+          onDayPress={(day) => {
+            setDate(day);
+          }}
+          monthFormat={'yyyy MM'}
+          hideArrows={false}
+          hideExtraDays={true}
+          disableMonthChange={true}
+          firstDay={1}
+          markedDates={{
+            [date.dateString]: {
+              selected: true,
+              selectedColor: 'orange',
+              selectedTextColor: 'red',
+            },
+          }}
+        />
+      </ScrollView>
       <View style={{justifyContent: 'center', alignItems: 'center'}}>
-        <TouchableOpacity style={styles.submitBtn} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.submitBtn}
+          activeOpacity={0.8}
+          onPress={onSubmit}>
           <Text style={{color: 'white'}}>Submit</Text>
         </TouchableOpacity>
       </View>
@@ -80,8 +179,6 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 40,
-    marginBottom: 10,
   },
   loginText: {
     color: 'grey',

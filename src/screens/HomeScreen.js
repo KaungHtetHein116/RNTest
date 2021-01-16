@@ -9,14 +9,14 @@ export default function HomeScreen() {
   useEffect(() => {
     db.transaction(function (txn) {
       txn.executeSql(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='table_user'",
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='item_table'",
         [],
         function (tx, res) {
           console.log('item:', res.rows);
           if (res.rows.length == 0) {
-            txn.executeSql('DROP TABLE IF EXISTS table_user', []);
+            txn.executeSql('DROP TABLE IF EXISTS item_table', []);
             txn.executeSql(
-              'CREATE TABLE IF NOT EXISTS table_user(user_id INTEGER PRIMARY KEY AUTOINCREMENT, user_name VARCHAR(20), user_contact INT(10), user_address VARCHAR(255))',
+              'CREATE TABLE IF NOT EXISTS item_table(item_id INTEGER PRIMARY KEY AUTOINCREMENT, item_name VARCHAR(20), type VARCHAR(20), item_price INT(100), date VARCHAR(20), month VARCHAR(15), year VARCHAR(10))',
               [],
             );
           }
@@ -25,9 +25,17 @@ export default function HomeScreen() {
     });
   }, []);
 
-  const [product, setProduct] = useState('');
-  const [price, setPrice] = useState('');
-  const [date, setDate] = useState('');
+  useEffect(() => {
+    db.transaction((tx) => {
+      tx.executeSql('SELECT * FROM item_table', [], (tx, results) => {
+        var temp = [];
+        for (let i = 0; i < results.rows.length; ++i)
+          temp.push(results.rows.item(i));
+        console.log('temp', temp);
+      });
+    });
+  }, []);
+
   const [modalVisible, setModalVisible] = useState(false);
 
   return (
