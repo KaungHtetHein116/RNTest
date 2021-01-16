@@ -1,18 +1,33 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, Picker, StyleSheet, FlatList} from 'react-native';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import {
+  View,
+  Text,
+  Picker,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+} from 'react-native';
 import {openDatabase} from 'react-native-sqlite-storage';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 const db = openDatabase({name: 'ItemDatabase.db'});
-const YEAR = [2020, 2021, 2022, 2023, 2024];
-const MONTH = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+const YEAR = ['2020', '2021', '2022', '2023', '2024'];
+const MONTH = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+const LABEL = {
+  day: 'Day',
+  item_name: 'Description',
+  item_price: 'Amount',
+  balance: 'Balance',
+};
 
+const {width, height} = Dimensions.get('window');
 export default function HistoryScreen() {
   const dateObj = new Date();
 
   const [data, setData] = useState([]);
   const [month, setMonth] = useState(dateObj.getUTCMonth() + 1);
   const [year, setYear] = useState(dateObj.getUTCFullYear());
+  const [balance, setBalance] = useState(0);
 
   const handleSelectYearMonthData = () => {
     db.transaction((tx) => {
@@ -35,43 +50,109 @@ export default function HistoryScreen() {
     console.log(month, year);
   }, []);
 
-  const pickerItem = () => {
-    return MONTH.map((month) => {
-      return <Picker.Item label={month} value={month} key={month} />;
+  const pickerItem = (array) => {
+    return array.map((item) => {
+      return <Picker.Item label={item} value={item} key={item} />;
     });
+  };
+
+  const dataItem = (item) => {
+    setBalance(
+      item.type === 'Income'
+        ? balance + item.item_price
+        : balance - item.item_price,
+    );
+
+    return (
+      <View style={styles.tableTitleContainer}>
+        <View style={styles.firstColumn}>
+          <Text>{item.day}</Text>
+        </View>
+        <View style={styles.secondColumn}>
+          <Text>{item.item_name}</Text>
+        </View>
+        <View style={styles.thirdColumn}>
+          <Text style={{color: item.type === 'Income' ? 'blue' : 'red'}}>
+            {item.type === 'Income' ? null : '- '}
+            {item.item_price}
+          </Text>
+        </View>
+        <View style={styles.lastColumn}>
+          <Text>{item.balance ? item.balance : balance}</Text>
+        </View>
+      </View>
+    );
   };
 
   return (
     <View style={styles.container}>
-      <View style={{flexDirection: 'row'}}>
-        <Text>Pick month</Text>
-        <Picker
-          selectedValue={month}
-          style={{height: 50, width: 100}}
-          onValueChange={(itemValue) => setMonth(itemValue)}>
-          {pickerItem()}
-        </Picker>
-        <Text>Pick year</Text>
-        <Picker
-          selectedValue={year}
-          style={{height: 50, width: 100}}
-          onValueChange={(itemValue) => setYear(itemValue)}>
-          <Picker.Item label="2020" value="2020" />
-          <Picker.Item label="2021" value="2021" />
-        </Picker>
+      <View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 10,
+          }}>
+          <Text>Pick month</Text>
+          <Text>Pick year</Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            margin: 10,
+          }}>
+          <Picker
+            selectedValue={month}
+            style={{height: 50, width: 100}}
+            onValueChange={(itemValue) => setMonth(itemValue)}>
+            {pickerItem(MONTH)}
+          </Picker>
+          <Picker
+            selectedValue={year}
+            style={{height: 50, width: 100}}
+            onValueChange={(itemValue) => setYear(itemValue)}>
+            {pickerItem(YEAR)}
+          </Picker>
+        </View>
+
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <TouchableOpacity
+            style={styles.submitBtn}
+            activeOpacity={0.8}
+            onPress={handleSelectYearMonthData}>
+            <Text style={{color: 'white'}}>Set Date</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={{}}>
-        <FlatList
-          data={data}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={({item}) => (
-            <View style={styles.itemContainer}>
-              <Text>Date Created: {item.date}</Text>
-              <Text>Item Name : {item.item_name}</Text>
-              <Text>Item Price: {item.item_price}</Text>
-            </View>
-          )}
-        />
+      <View>
+        <View>
+          <View>
+            {dataItem(LABEL)}
+            <FlatList
+              data={data}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={({item}) => dataItem(item)}
+              ListEmptyComponent={() => (
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: 'red',
+                  }}>
+                  <Text>no data</Text>
+                </View>
+              )}
+            />
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -90,5 +171,51 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  firstColumn: {
+    borderWidth: 1,
+    borderLeftColor: 'black',
+  },
+  submitBtn: {
+    backgroundColor: 'dodgerblue',
+
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+  },
+  tableTitleContainer: {
+    flexDirection: 'row',
+    width: width,
+    paddingTop: 5,
+    paddingBottom: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: 'black',
+  },
+  firstColumn: {
+    width: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  secondColumn: {
+    width: (width - 50) / 2,
+    borderLeftWidth: 1,
+    borderLeftColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  thirdColumn: {
+    width: (width - 50) / 4,
+    borderLeftWidth: 1,
+    borderLeftColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lastColumn: {
+    width: (width - 50) / 4,
+    borderLeftWidth: 1,
+    borderLeftColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

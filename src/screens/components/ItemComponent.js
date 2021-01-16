@@ -33,14 +33,16 @@ export default function ItemComponent({item, getItem}) {
     });
   };
   return (
-    <View style={{flexDirection: 'row'}}>
+    <View>
       <View style={styles.itemContainer}>
-        <Text>{item.item_name}</Text>
-        <Text>{item.item_price}</Text>
-        <Text>{item.date}</Text>
-        <TouchableOpacity onPress={() => handlePressDelete(item.item_id)}>
-          <AntDesign name="delete" size={30} />
-        </TouchableOpacity>
+        <View style={{justifyContent: 'space-between', flexDirection: 'row'}}>
+          <Text>Item Name : {item.item_name}</Text>
+          <TouchableOpacity onPress={() => handlePressDelete(item.item_id)}>
+            <AntDesign name="delete" size={30} />
+          </TouchableOpacity>
+        </View>
+        <Text>Item Price : {item.item_price}</Text>
+        <Text>Date : {item.date}</Text>
       </View>
     </View>
   );
@@ -48,9 +50,13 @@ export default function ItemComponent({item, getItem}) {
 
 const styles = StyleSheet.create({
   itemContainer: {
-    flexDirection: 'row',
     margin: 10,
     padding: 20,
     justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'black',
+    backgroundColor: 'white',
+    elevation: 10,
+    borderRadius: 10,
   },
 });

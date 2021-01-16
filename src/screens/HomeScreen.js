@@ -26,7 +26,7 @@ export default function HomeScreen() {
           if (res.rows.length == 0) {
             txn.executeSql('DROP TABLE IF EXISTS item_table', []);
             txn.executeSql(
-              'CREATE TABLE IF NOT EXISTS item_table(item_id INTEGER PRIMARY KEY AUTOINCREMENT, item_name VARCHAR(20), type VARCHAR(20), item_price INT(100), date VARCHAR(20), month VARCHAR(15), year VARCHAR(10))',
+              'CREATE TABLE IF NOT EXISTS item_table(item_id INTEGER PRIMARY KEY AUTOINCREMENT, item_name VARCHAR(20), type VARCHAR(20), item_price INT(100), date VARCHAR(20),day VARCHAR(5), month VARCHAR(15), year VARCHAR(10))',
               [],
             );
           }
@@ -68,6 +68,17 @@ export default function HomeScreen() {
         keyExtractor={(_, index) => index.toString()}
         renderItem={({item}) => (
           <ItemComponent item={item} getItem={() => getItem()} />
+        )}
+        ListEmptyComponent={() => (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'red',
+            }}>
+            <Text>no data</Text>
+          </View>
         )}
       />
       <ActionButton

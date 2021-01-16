@@ -60,12 +60,13 @@ export default function CreateItemModal({onClose}) {
 
     db.transaction(function (tx) {
       tx.executeSql(
-        'INSERT INTO item_table (item_name, type, item_price, date, month, year) VALUES (?,?,?,?,?,?)',
+        'INSERT INTO item_table (item_name, type, item_price, date, day, month, year) VALUES (?,?,?,?,?,?,?)',
         [
           itemName,
           itemType.label,
           itemPrice,
           date.dateString,
+          date.day,
           date.month,
           date.year,
         ],
