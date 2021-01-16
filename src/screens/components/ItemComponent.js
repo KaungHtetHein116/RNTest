@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, Alert, StyleSheet} from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import {openDatabase} from 'react-native-sqlite-storage';
 
@@ -34,10 +34,23 @@ export default function ItemComponent({item, getItem}) {
   };
   return (
     <View style={{flexDirection: 'row'}}>
-      <Text>{item.item_price}</Text>
-      <TouchableOpacity onPress={() => handlePressDelete(item.item_id)}>
-        <AntDesign name="delete" size={30} />
-      </TouchableOpacity>
+      <View style={styles.itemContainer}>
+        <Text>{item.item_name}</Text>
+        <Text>{item.item_price}</Text>
+        <Text>{item.date}</Text>
+        <TouchableOpacity onPress={() => handlePressDelete(item.item_id)}>
+          <AntDesign name="delete" size={30} />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  itemContainer: {
+    flexDirection: 'row',
+    margin: 10,
+    padding: 20,
+    justifyContent: 'space-between',
+  },
+});
