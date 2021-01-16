@@ -1,11 +1,21 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, Button, TextInput, Modal} from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  FlatList,
+} from 'react-native';
+import ActionButton from 'react-native-action-button';
 import {openDatabase} from 'react-native-sqlite-storage';
 import CreateItemModal from './components/CreateItemModal';
+import ItemComponent from './components/ItemComponent';
 
+var db = openDatabase({name: 'ItemDatabase.db'});
 export default function HomeScreen() {
-  var db = openDatabase({name: 'UserDatabase.db'});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [data, setData] = useState([]);
   useEffect(() => {
     db.transaction(function (txn) {
       txn.executeSql(
@@ -24,19 +34,21 @@ export default function HomeScreen() {
       );
     });
   }, []);
-
-  useEffect(() => {
+  const getItem = () => {
     db.transaction((tx) => {
       tx.executeSql('SELECT * FROM item_table', [], (tx, results) => {
         var temp = [];
         for (let i = 0; i < results.rows.length; ++i)
           temp.push(results.rows.item(i));
         console.log('temp', temp);
+        setData(temp);
       });
     });
-  }, [modalVisible]);
-
-  const [modalVisible, setModalVisible] = useState(false);
+    console.log('get item');
+  };
+  useEffect(() => {
+    getItem();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -44,17 +56,27 @@ export default function HomeScreen() {
         animationType="slide"
         visible={modalVisible}
         onRequestClose={() => setModalVisible(!modalVisible)}>
-        <CreateItemModal onClose={() => setModalVisible(false)} />
+        <CreateItemModal
+          onClose={() => {
+            setModalVisible(false);
+            getItem();
+          }}
+        />
       </Modal>
-      <Text>HomeScreen</Text>
-      <View style={{justifyContent: 'center', alignItems: 'center', width: 70}}>
-        <TouchableOpacity
-          style={styles.submitBtn}
-          activeOpacity={0.8}
-          onPress={() => setModalVisible(true)}>
-          <Text style={{color: 'white'}}>Add</Text>
-        </TouchableOpacity>
-      </View>
+      <FlatList
+        data={data}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({item}) => (
+          <ItemComponent item={item} getItem={() => getItem()} />
+        )}
+      />
+      <ActionButton
+        buttonColor="dodgerblue"
+        onPress={() => {
+          setModalVisible(true);
+        }}
+        style={{marginBottom: 40}}
+      />
     </View>
   );
 }

@@ -1,19 +1,20 @@
-import React, {useState, useEffect} from 'react';
+import RadioButtonRN from 'radio-buttons-react-native';
+import React, {useState} from 'react';
 import {
-  View,
-  Text,
   StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
+  View,
+  Alert,
 } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {Calendar} from 'react-native-calendars';
-import {openDatabase} from 'react-native-sqlite-storage';
-import RadioButtonRN from 'radio-buttons-react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {ScrollView} from 'react-native-gesture-handler';
+import {openDatabase} from 'react-native-sqlite-storage';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
-var db = openDatabase({name: 'UserDatabase.db'});
+var db = openDatabase({name: 'ItemDatabase.db'});
 const data = [
   {
     label: 'Income',
