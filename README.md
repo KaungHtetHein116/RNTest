@@ -1,6 +1,6 @@
 # RNTest
 
-##### Standalone App which uses SQLITE for data persistent.
+##### Standalone App which uses SQLITE for data persistence.
 
 ### Minor issue
 
